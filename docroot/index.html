@@ -67,7 +67,10 @@
 		setTimeout(interval,1);
 	}
 
-	function updateDisplay() {
+	/**
+	 * update the clock view
+	 */
+	function updateClockDisplay() {
 		$days.innerHTML = days;
 		$hours.innerHTML = hours;
 		$minutes.innerHTML = minutes;
@@ -75,6 +78,12 @@
 		$milliseconds.innerHTML = milliseconds;
 	}
 
+	/**
+	 * prefix an integer with some arbitrary character, eg '0'
+	 * @param integer (or whatever) to left pad
+	 * @param integer desired ending length
+	 * @return string
+	 */
 	function numberPad(integer, stringLength, padChar) {
 		var s = '' + integer;
 		while(s.length < stringLength) {
@@ -83,23 +92,42 @@
 		return s;
 	}
 
+	/**
+	 * update time values relative to reflect difference b/t 'now' and ending time
+	 * @return bool
+	 */
 	function updateTime() {
 
-		var now = new Date(), nowMS = now.getTime(), remainMS = targetMS - nowMS;
+		var now = new Date(),
+			nowMS = now.getTime(),
+			remainMS = targetMS - nowMS;
 
 		days = numberPad(parseInt((remainMS % yearMS) / dayMS), 2, '0');
 		hours = numberPad(parseInt((remainMS % dayMS) / hourMS), 2, '0');
 		minutes = numberPad(parseInt((remainMS % hourMS) / minuteMS), 2, '0');
 		seconds = numberPad(parseInt((remainMS % minuteMS) / secondMS), 2, '0');
 		milliseconds = numberPad(remainMS % secondMS, 3, '0');
+
+		return remainMS > 0;
 	}
 
+	/**
+	 * one animation cycle
+	 * sets a timeout to run itself again in 1ms
+	 * @void
+	 */
 	function interval() {
-		updateTime();
-		updateDisplay();
+		var timeRemains = updateTime();
+
+		if (!timeRemains)
+			alert('happy new year fuckers!');
+
+		updateClockDisplay();
 		setTimeout(interval,1);
 	}
 
+
+	// lets go
 	run();
 
 	</script>
