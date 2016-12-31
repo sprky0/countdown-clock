@@ -2,34 +2,67 @@
 <head>
 	<style>
 
-	.clock div {
+	html, body {
+		margin:0;
+		padding: 0;
+		width: 100%;
+	}
+
+	#countdown {
+		max-width: 100;
+		overflow: auto;
+	}
+
+	.clock {
+		margin: 0 auto;
 		display: inline-block;
 		font-size: 3em;
-		font-family: helvetica;
+		font-family: courier;
 		font-weight: 800;
 		padding: 0;
 		margin: 0;
+		white-space: nowrap;
+	}
+
+	.clock div {
+		display: inline-block;
+		font: inherit;
+		padding: 0;
+		margin: 0;
+		background-color: red;
+		float: left;
+		white-space: nowrap;
 	}
 
 	.clock div:after {
 		content: ':';
+		margin: 0; padding: 0;
 	}
 
 	.clock div:last-child:after {
 		content: '';
+		margin: 0; padding: 0;
+		clear: both;
 	}
 
+	.hidden {
+		display: none;
+	}
 
 	</style>
 </head>
 <body>
 
-	<div class="clock">
-		<div id="days"></div>
-		<div id="hours"></div>
-		<div id="minutes"></div>
-		<div id="seconds"></div>
-		<div id="milliseconds"></div>
+	<div id="countdown">
+
+		<div id="main" class="clock">
+			<div id="days"></div>
+			<div id="hours"></div>
+			<div id="minutes"></div>
+			<div id="seconds"></div>
+			<div id="milliseconds"></div>
+		</div>
+
 	</div>
 
 	<script>
@@ -41,8 +74,13 @@
 	var minuteMS = 60 * 1000;
 	var secondMS = 1000; // ehhhhhhhhhhhhhhh
 
+	var fontSizeEMs = 1;
+
 	// variable
+	var targetYear = 3000;
 	var targetMS;
+	var $body;
+	var $main; // wrap
 	var $days,$hours,$minutes,$seconds,$milliseconds;
 	var days,hours,minutes,seconds,milliseconds;
 
@@ -52,9 +90,11 @@
 
 	function run() {
 
-		// target = new Date(
-		// set 2017 second
-		targetMS = new Date(2017, 0, 1).getTime();
+		targetYear = new Date().getFullYear() + 1;
+		targetMS = new Date(targetYear, 0, 1).getTime();
+
+		$body = document.getElementsByTagName("body")[0];
+		$main = getID("main");
 
 		// get ya dom
 		$days = getID("days");
@@ -119,16 +159,31 @@
 	function interval() {
 		var timeRemains = updateTime();
 
-		if (!timeRemains)
-			alert('happy new year fuckers!');
+		if (!timeRemains) {
+			endedAnimation();
+		}
 
 		updateClockDisplay();
 		setTimeout(interval,1);
 	}
 
+	function scaleToFullWidth() {
+		$main.style.fontSize = fontSizeEMs + "em";
+		if ($main.clientWidth < $body.clientWidth)
+			fontSizeEMs += 0.01;
+		else if ($main.clientWidth > $body.clientWidth)
+			fontSizeEMs -= 0.01;
+	}
+
+	function endedAnimation() {
+
+	}
 
 	// lets go
+	var scaleInterval = setInterval(scaleToFullWidth, 1);
+
 	run();
+
 
 	</script>
 
