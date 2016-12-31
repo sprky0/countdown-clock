@@ -1,0 +1,108 @@
+<html>
+<head>
+	<style>
+
+	.clock div {
+		display: inline-block;
+		font-size: 3em;
+		font-family: helvetica;
+		font-weight: 800;
+		padding: 0;
+		margin: 0;
+	}
+
+	.clock div:after {
+		content: ':';
+	}
+
+	.clock div:last-child:after {
+		content: '';
+	}
+
+
+	</style>
+</head>
+<body>
+
+	<div class="clock">
+		<div id="days"></div>
+		<div id="hours"></div>
+		<div id="minutes"></div>
+		<div id="seconds"></div>
+		<div id="milliseconds"></div>
+	</div>
+
+	<script>
+
+	// constants
+	var yearMS = 365 * 24 * 60 * 60 * 1000;
+	var dayMS = 24 * 60 * 60 * 1000;
+	var hourMS = 60 * 60 * 1000;
+	var minuteMS = 60 * 1000;
+	var secondMS = 1000; // ehhhhhhhhhhhhhhh
+
+	// variable
+	var targetMS;
+	var $days,$hours,$minutes,$seconds,$milliseconds;
+	var days,hours,minutes,seconds,milliseconds;
+
+	function getID(d) {
+		return document.getElementById(d);
+	}
+
+	function run() {
+
+		// target = new Date(
+		// set 2017 second
+		targetMS = new Date(2017, 0, 1).getTime();
+
+		// get ya dom
+		$days = getID("days");
+		$hours = getID("hours");
+		$minutes = getID("minutes");
+		$seconds = getID("seconds");
+		$milliseconds = getID("milliseconds");
+
+		// start running!
+		setTimeout(interval,1);
+	}
+
+	function updateDisplay() {
+		$days.innerHTML = days;
+		$hours.innerHTML = hours;
+		$minutes.innerHTML = minutes;
+		$seconds.innerHTML = seconds;
+		$milliseconds.innerHTML = milliseconds;
+	}
+
+	function numberPad(integer, stringLength, padChar) {
+		var s = '' + integer;
+		while(s.length < stringLength) {
+			s = padChar + s;
+		}
+		return s;
+	}
+
+	function updateTime() {
+
+		var now = new Date(), nowMS = now.getTime(), remainMS = targetMS - nowMS;
+
+		days = numberPad(parseInt((remainMS % yearMS) / dayMS), 2, '0');
+		hours = numberPad(parseInt((remainMS % dayMS) / hourMS), 2, '0');
+		minutes = numberPad(parseInt((remainMS % hourMS) / minuteMS), 2, '0');
+		seconds = numberPad(parseInt((remainMS % minuteMS) / secondMS), 2, '0');
+		milliseconds = numberPad(remainMS % secondMS, 3, '0');
+	}
+
+	function interval() {
+		updateTime();
+		updateDisplay();
+		setTimeout(interval,1);
+	}
+
+	run();
+
+	</script>
+
+</body>
+</html>
