@@ -42,8 +42,12 @@
 		$seconds = getID("seconds");
 		$milliseconds = getID("milliseconds");
 
+		$body.addEventListener("click", function(){
+			interval();
+			fullscreen($body);
+		});
+
 		// start running!
-		interval();
 	}
 
 	/**
@@ -207,6 +211,21 @@
 		if (Math.random() > .6)
 			fluffBgs();
 		setTimeout(backgroundMangler,  Math.random() * 200);
+	}
+
+	function fullscreen(elem) {
+
+		console.log(elem);
+
+		if (elem.requestFullscreen) {
+			elem.requestFullscreen();
+		} else if (elem.msRequestFullscreen) {
+			elem.msRequestFullscreen();
+		} else if (elem.mozRequestFullScreen) {
+			elem.mozRequestFullScreen();
+		} else if (elem.webkitRequestFullscreen) {
+			elem.webkitRequestFullscreen();
+		}
 	}
 
 	// lets go
