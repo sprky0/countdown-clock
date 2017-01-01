@@ -9,7 +9,7 @@
 	var secondMS = 1000; // ehhhhhhhhhhhhhhh
 
 	var fontSizeEMs = 11;
-	var numBgLayers = 2;
+	var numBgLayers = 3;
 	var didEnded = false;
 	// variable
 	var $body;
@@ -30,7 +30,7 @@
 		targetYear = new Date().getFullYear() + 1;
 		targetMS = new Date(targetYear, 0, 1).getTime();
 
-		targetMS = new Date(2016,11,31,18,43,0).getTime();
+		// targetMS = new Date(2016,11,31,18,43,0).getTime();
 
 		$body = document.getElementsByTagName("body")[0];
 		$main = getID("main");
@@ -133,7 +133,7 @@
 
 
 	function _c() {
-		return 'rgba(' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ',' + Math.random().toPrecision(2) + ')';
+		return 'rgba(' + Math.floor(Math.random() * 100) + ',' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ',' + Math.random().toPrecision(2) + ')';
 	}
 
 	function _l() {
@@ -144,7 +144,7 @@
 
 		var s = '';
 
-		for(var i = 0; i < Math.random() * 100; i++) {
+		for(var i = 0; i < Math.random() * 3; i++) {
 			if (s != '')
 				s += ',';
 			s += _l();
@@ -175,7 +175,6 @@
 	}
 
 	function updateBackgrounds() {
-
 		for(var bgi = 1; bgi <= numBgLayers; bgi++) {
 			if (!backgroundPositions['bg' + bgi]) {
 				fluffBgs();
@@ -186,10 +185,9 @@
 					cur.speeds[i] *= -1;
 				cur.vars[i] += cur.speeds[i];
 			}
-
 			// apply across our moving crap
-			// cur.obj.style.backgroundPosition = cur.vars[0] + 'px ' + cur.vars[1] + 'px';
-			// cur.obj.style.backgroundSize = cur.vars[2] + 'px ' + cur.vars[3] + 'px';
+			cur.obj.style.backgroundPosition = cur.vars[0] + 'px ' + cur.vars[1] + 'px';
+			cur.obj.style.backgroundSize = cur.vars[2] + 'px ' + cur.vars[3] + 'px';
 		}
 	}
 
@@ -204,11 +202,11 @@
 
 	function backgroundMangler(noLoop) {
 		updateBackgrounds();
-		if (Math.random() > .97)
+		if (Math.random() > .6)
 			randomBackgrounds();
-		if (Math.random() > .97)
+		if (Math.random() > .6)
 			fluffBgs();
-		setTimeout(backgroundMangler,  Math.random() * 500);
+		setTimeout(backgroundMangler,  Math.random() * 200);
 	}
 
 	// lets go
@@ -216,7 +214,7 @@
 	fluffBgs();
 	randomBackgrounds();
 
-	setTimeout(backgroundMangler, 1000);
+	backgroundMangler();
 	// setInterval(updateBackgrounds, 1);
 
 	run();

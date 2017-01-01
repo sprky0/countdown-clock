@@ -4,6 +4,7 @@
 		padding: 0;
 		width: 100%;
 		overflow: hidden;
+		background: pink;
 	}
 
 	.floaty {
@@ -18,7 +19,7 @@
 		background-size: 250px 250px;
 		background-position: 0 0;
 
-		transition: background 0.5s ease;
+		/*transition: background 0.5s ease;*/
 
 	}
 
@@ -74,10 +75,11 @@
 	#message {
 		position: fixed;
 		font-size: 10em;
-		color: red;
+		color: white;
 		text-shadow: 0 0 100px white;
 		z-index: 2000000;
 		top: 30%; left: 0;
 		text-align: center;
 		width: 100%;
+		font-family: helvetica
 	}
