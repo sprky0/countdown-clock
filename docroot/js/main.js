@@ -1,3 +1,4 @@
+(function(){
 
 	var backgroundPositions = {};
 
@@ -14,6 +15,7 @@
 	// variable
 	var $body;
 	var $main; // wrap
+	var $tools;
 	var $days,$hours,$minutes,$seconds,$milliseconds;
 	var $displayStatuses = {};
 
@@ -25,7 +27,7 @@
 		return document.getElementById(d);
 	}
 
-	function run() {
+	function run(mode) {
 
 		targetYear = new Date().getFullYear() + 1;
 		targetMS = new Date(targetYear, 0, 1).getTime();
@@ -34,6 +36,7 @@
 
 		$body = document.getElementsByTagName("body")[0];
 		$main = getID("main");
+		$tools = getID("tools");
 
 		// get ya dom
 		$days = getID("days");
@@ -42,12 +45,21 @@
 		$seconds = getID("seconds");
 		$milliseconds = getID("milliseconds");
 
-		$body.addEventListener("click", function(){
-			interval();
-			fullscreen($body);
-		});
+		$tools.classList.add("hidden");
 
-		// start running!
+		switch(mode) {
+			default:
+			case "year":
+			interval();
+			break;
+
+			case "happynewyear":
+			$main.classList.add("hidden");
+			endedAnimation();
+			break;
+		}
+
+		fullscreen($body);
 	}
 
 	/**
@@ -196,9 +208,7 @@
 	}
 
 	function endedAnimation() {
-		console.log("ENDED");
-		// HAPPY NEW YEAR!  then reset
-		// document.getElementById('message').classList.remove('hidden');
+		// HAPPY NEW YEAR!
 		setInterval(function(){
 			document.getElementById('message').classList.toggle('hidden');
 		}, 250);
@@ -214,9 +224,6 @@
 	}
 
 	function fullscreen(elem) {
-
-		console.log(elem);
-
 		if (elem.requestFullscreen) {
 			elem.requestFullscreen();
 		} else if (elem.msRequestFullscreen) {
@@ -228,12 +235,8 @@
 		}
 	}
 
-	// lets go
-	// var scaleInterval = setInterval(scaleToFullWidth, 1);
 	fluffBgs();
 	randomBackgrounds();
-
 	backgroundMangler();
-	// setInterval(updateBackgrounds, 1);
 
-	run();
+})();

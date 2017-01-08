@@ -83,3 +83,10 @@
 		width: 100%;
 		font-family: helvetica
 	}
+
+	#tools {
+		z-index: 11111111;
+		position: fixed;
+		top: 0;
+		left: 0;
+	}
