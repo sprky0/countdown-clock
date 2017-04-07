@@ -71,13 +71,6 @@
 		$minutes.innerHTML = minutes;
 		$seconds.innerHTML = seconds;
 		$milliseconds.innerHTML = milliseconds;
-
-		// if  (days == 0 && hours <= 24 && minutes <= 60 && seconds <= 50 && $displayStatuses['days'] !== false) {
-		// 	$displayStatuses['days'] = false;
-		// 	$days.classList.add('hidden');
-		// }
-
-
 	}
 
 	/**
@@ -238,5 +231,7 @@
 	fluffBgs();
 	randomBackgrounds();
 	backgroundMangler();
+
+	window.run = run;
 
 })();
