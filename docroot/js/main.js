@@ -19,6 +19,9 @@
 	var $days,$hours,$minutes,$seconds,$milliseconds;
 	var $displayStatuses = {};
 
+	var $message;
+	var $freakout;
+
 	var targetYear = 2018;
 	var targetMS;
 	var days,hours,minutes,seconds,milliseconds;
@@ -31,16 +34,26 @@
 		return document.getElementById(d);
 	}
 
+	function getClass(c) {
+		return document.getElementsByClassName(c);
+	}
+
 	function run(mode) {
+
+		didEnded = false;
 
 		targetYear = new Date().getFullYear() + 1;
 		targetMS = new Date(targetYear, 0, 1).getTime();
 
-		// targetMS = new Date(2016,11,31,18,43,0).getTime();
+		// test MS now
+		targetMS = new Date().getTime() + 10000; // 2016,11,31,18,43,0).getTime();
 
 		$body = document.getElementsByTagName("body")[0];
 		$main = getID("main");
 		$tools = getID("tools");
+
+		$message = getID("message");
+		$freakout = getClass("freakoutframe")[0];
 
 		// get ya dom
 		$days = getID("days");
@@ -54,6 +67,11 @@
 		switch(mode) {
 			default:
 			case "year":
+
+			$message.classList.add('hidden');
+			$tools.classList.add("hidden");
+			$freakout.classList.add("hidden");
+
 			interval();
 			break;
 
@@ -109,7 +127,10 @@
 		hours = numberPad(parseInt((remainMS % dayMS) / hourMS), 2, '0');
 		minutes = numberPad(parseInt((remainMS % hourMS) / minuteMS), 2, '0');
 		seconds = numberPad(parseInt((remainMS % minuteMS) / secondMS), 2, '0');
-		milliseconds = numberPad(remainMS % secondMS, 3, '0');
+
+		var lessMS = new String((remainMS % secondMS) / 10).split(".")[0];
+
+		milliseconds = numberPad(lessMS, 2, '0'); // @todo round down to 2 places ?
 
 		return remainMS > 0;
 	}
@@ -127,6 +148,10 @@
 			endedAnimation();
 		}
 
+		if (didEnded) {
+			freakoutFrame();
+		}
+
 		updateClockDisplay();
 		// scaleToFullWidth();
 
@@ -142,8 +167,6 @@
 			fontSizeEMs -= 0.01;
 		// $main.style.marginTop = '-' + ($main.clientHeight / 2) + 'px';
 	}
-
-
 
 	function _c() {
 		return 'rgba(' + Math.floor(Math.random() * 100) + ',' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ',' + Math.random().toPrecision(2) + ')';
@@ -167,13 +190,19 @@
 
 	}
 
+	function freakoutFrame() {
+		$freakout.classList.remove("hidden");
+		$freakout.classList.toggle("freakout-mode1");
+		$freakout.classList.toggle("freakout-mode2");
+	}
+
 	function fluffBgs() {
 
-		numBgLayers = document.getElementsByClassName('floaty').length;
+		numBgLayers = getClass("floaty").length;
 
 		for(var bgi = 1; bgi <= numBgLayers; bgi++) {
 			backgroundPositions['bg' + bgi] = {
-				'obj' : document.getElementsByClassName('bg' + bgi)[0],
+				'obj' : getClass('bg' + bgi)[0],
 				'vars' : [Math.random() * 2000, Math.random() * 2000, Math.random() * 2000, Math.random() * 2000],
 				'speeds' : [Math.random() * 100 - 50, Math.random() * 100 - 50, Math.random() * 100 - 50, Math.random() * 100 - 50]
 			};
@@ -206,16 +235,31 @@
 
 	function endedAnimation() {
 		// HAPPY NEW YEAR!
-		setInterval(function(){
-			document.getElementById('message').classList.toggle('hidden');
+		var blinker = setInterval(function(){
+			$message.classList.toggle('hidden');
 		}, 250);
+
+		setTimeout(function(){
+
+			clearTimeout(blinker);
+			$message.classList.remove('hidden');
+			$message.innerHTML = "OH SHIT! HERE WE GO AGAIN!";
+
+			setTimeout(function(){
+				$message.classList.add('hidden');
+				$message.innerHTML = "HAPPY NEW YEAR!";
+				run("year");
+			}, 10 * secondMS);
+
+		}, 45 * secondMS); // in 45 seconds, start counting down to next year
+
 	}
 
 	function backgroundMangler(noLoop) {
 		updateBackgrounds();
-		if (Math.random() > .6)
+		if (Math.random() > .5)
 			randomBackgrounds();
-		if (Math.random() > .6)
+		if (Math.random() > .5)
 			fluffBgs();
 		setTimeout(backgroundMangler,  Math.random() * 600);
 	}
