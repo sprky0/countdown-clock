@@ -10,7 +10,7 @@
 	var secondMS = 1000; // ehhhhhhhhhhhhhhh
 
 	var fontSizeEMs = 11;
-	var numBgLayers = 3;
+	var numBgLayers = 1;
 	var didEnded = false;
 	// variable
 	var $body;
@@ -19,10 +19,14 @@
 	var $days,$hours,$minutes,$seconds,$milliseconds;
 	var $displayStatuses = {};
 
-	var targetYear = 3000;
+	var targetYear = 2018;
 	var targetMS;
 	var days,hours,minutes,seconds,milliseconds;
 
+	/**
+ 	 * @param {string} d ID of the target element
+	 * @return {HTMLElement} the selected element
+	 */
 	function getID(d) {
 		return document.getElementById(d);
 	}
@@ -75,9 +79,9 @@
 
 	/**
 	 * prefix an integer with some arbitrary character, eg '0'
-	 * @param integer (or whatever) to left pad
-	 * @param integer desired ending length
-	 * @return string
+	 * @param {integer} integer - (or whatever) to left pad
+	 * @param {integer} stringLength - desired ending length
+	 * @return {string} The resulting string
 	 */
 	function numberPad(integer, stringLength, padChar) {
 		var s = '' + integer;
@@ -89,7 +93,7 @@
 
 	/**
 	 * update time values relative to reflect difference b/t 'now' and ending time
-	 * @return bool
+	 * @return {bool}
 	 */
 	function updateTime() {
 
@@ -124,7 +128,7 @@
 		}
 
 		updateClockDisplay();
-		scaleToFullWidth();
+		// scaleToFullWidth();
 
 		requestAnimationFrame(interval);
 
@@ -213,7 +217,7 @@
 			randomBackgrounds();
 		if (Math.random() > .6)
 			fluffBgs();
-		setTimeout(backgroundMangler,  Math.random() * 200);
+		setTimeout(backgroundMangler,  Math.random() * 600);
 	}
 
 	function fullscreen(elem) {
