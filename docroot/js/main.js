@@ -38,15 +38,18 @@
 		return document.getElementsByClassName(c);
 	}
 
-	function run(mode) {
+	function run(mode, quickMS) {
 
 		didEnded = false;
 
 		targetYear = new Date().getFullYear() + 1;
-		targetMS = new Date(targetYear, 0, 1).getTime();
 
-		// test MS now
-		targetMS = new Date().getTime() + 10000; // 2016,11,31,18,43,0).getTime();
+		if (!!quickMS) {
+			targetMS = new Date().getTime() + quickMS;
+		} else {
+			// next year normally
+			targetMS = new Date(targetYear, 0, 1).getTime();
+		}
 
 		$body = document.getElementsByTagName("body")[0];
 		$main = getID("main");
@@ -67,11 +70,9 @@
 		switch(mode) {
 			default:
 			case "year":
-
 			$message.classList.add('hidden');
 			$tools.classList.add("hidden");
 			$freakout.classList.add("hidden");
-
 			interval();
 			break;
 
@@ -79,6 +80,7 @@
 			$main.classList.add("hidden");
 			endedAnimation();
 			break;
+
 		}
 
 		fullscreen($body);
