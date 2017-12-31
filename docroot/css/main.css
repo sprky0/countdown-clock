@@ -6,6 +6,7 @@
 		overflow: hidden;
 		background: pink;
 		cursor: none;
+		font-family: "VT323", "Courier New", Courier, monospace;
 	}
 
 	.floaty {
@@ -37,7 +38,6 @@
 		margin: 0 auto;
 		display: inline-block;
 		font-size: 16em;
-		font-family: "VT323", "Courier New", Courier, monospace;
 		font-weight: 800;
 		padding: 0;
 		margin: 0;
@@ -82,7 +82,6 @@
 		top: 30%; left: 0;
 		text-align: center;
 		width: 100%;
-		font-family: helvetica
 	}
 
 	#tools {
