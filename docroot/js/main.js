@@ -22,9 +22,13 @@
 	var $message;
 	var $freakout;
 
-	var targetYear = 2018;
-	var targetMS;
+	var targetYear = 2023;
+	// var targetMS = new Date(2022, 6, 16, 12 + 9, 0, 0).getTime();
+	var targetMS = false;
 	var days,hours,minutes,seconds,milliseconds;
+
+	var completeMessage = "HAPPY NEW YEAR!";
+	// var completeMessage = "YOU ARE 40!";
 
 	/**
  	 * @param {string} d ID of the target element
@@ -44,11 +48,13 @@
 
 		targetYear = new Date().getFullYear() + 1;
 
-		if (!!quickMS) {
+		if (targetMS === false && !!quickMS) {
 			targetMS = new Date().getTime() + quickMS;
-		} else {
+		} else if (targetMS === false) {
 			// next year normally
 			targetMS = new Date(targetYear, 0, 1).getTime();
+		} else {
+			// we are using some other setting for target time!  like birthday or whatever
 		}
 
 		$body = document.getElementsByTagName("body")[0];
@@ -68,6 +74,7 @@
 		$tools.classList.add("hidden");
 
 		switch(mode) {
+
 			default:
 			case "year":
 			$message.classList.add('hidden');
@@ -236,6 +243,9 @@
 	}
 
 	function endedAnimation() {
+
+		$message.innerHTML = completeMessage;
+
 		// HAPPY NEW YEAR!
 		var blinker = setInterval(function(){
 			$message.classList.toggle('hidden');
@@ -249,7 +259,7 @@
 
 			setTimeout(function(){
 				$message.classList.add('hidden');
-				$message.innerHTML = "HAPPY NEW YEAR!";
+				$message.innerHTML = completeMessage;
 				run("year");
 			}, 10 * secondMS);
 
