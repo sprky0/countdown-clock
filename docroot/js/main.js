@@ -1,297 +1,249 @@
-(function(){
-
-	var backgroundPositions = {};
-
-	// constants
-	var yearMS = 365 * 24 * 60 * 60 * 1000;
-	var dayMS = 24 * 60 * 60 * 1000;
-	var hourMS = 60 * 60 * 1000;
-	var minuteMS = 60 * 1000;
-	var secondMS = 1000; // ehhhhhhhhhhhhhhh
-
-	var fontSizeEMs = 11;
-	var numBgLayers = 1;
-	var didEnded = false;
-	// variable
-	var $body;
-	var $main; // wrap
-	var $tools;
-	var $days,$hours,$minutes,$seconds,$milliseconds;
-	var $displayStatuses = {};
-
-	var $message;
-	var $freakout;
-
-	var targetYear = 2023;
-	// var targetMS = new Date(2022, 6, 16, 12 + 9, 0, 0).getTime();
-	var targetMS = false;
-	var days,hours,minutes,seconds,milliseconds;
-
-	var completeMessage = "HAPPY NEW YEAR!";
-	// var completeMessage = "YOU ARE 40!";
-
-	/**
- 	 * @param {string} d ID of the target element
-	 * @return {HTMLElement} the selected element
-	 */
-	function getID(d) {
-		return document.getElementById(d);
+// Time constants in milliseconds
+const TIME_CONSTANTS = {
+	YEAR: 365 * 24 * 60 * 60 * 1000,
+	DAY: 24 * 60 * 60 * 1000,
+	HOUR: 60 * 60 * 1000,
+	MINUTE: 60 * 1000,
+	SECOND: 1000
+};
+	
+class CountdownTimer {
+	constructor() {
+		this.state = {
+			fontSizeEMs: 20,
+			numBgLayers: 1,
+			didEnded: false,
+			targetYear: new Date().getFullYear() + 1,
+			targetMS: null,
+			backgroundPositions: {},
+			completeMessage: "HAPPY NEW YEAR!"
+		};
+	
+		this.elements = {};
 	}
+	
+	// DOM helper methods
+	getElement = (selector, context = document) => context.querySelector(selector);
+	getAllElements = (selector, context = document) => context.querySelectorAll(selector);
+	
+	// Initialize the countdown
+	initialize(mode = 'year', quickMS = null) {
+		this.state.didEnded = false;
+		this.state.targetMS = quickMS ? 
+		new Date().getTime() + quickMS : 
+		new Date(this.state.targetYear, 0, 1).getTime();
+	
+		this.freakymode = 1;
+		this.freakymodes = 5;
 
-	function getClass(c) {
-		return document.getElementsByClassName(c);
-	}
-
-	function run(mode, quickMS) {
-
-		didEnded = false;
-
-		targetYear = new Date().getFullYear() + 1;
-
-		if (targetMS === false && !!quickMS) {
-			targetMS = new Date().getTime() + quickMS;
-		} else if (targetMS === false) {
-			// next year normally
-			targetMS = new Date(targetYear, 0, 1).getTime();
-		} else {
-			// we are using some other setting for target time!  like birthday or whatever
+		// Cache DOM elements
+		this.elements = {
+		body: this.getElement('body'),
+		main: this.getElement('#main'),
+		tools: this.getElement('#tools'),
+		message: this.getElement('#message'),
+		freakout: this.getElement('.freakoutframe'),
+		countdown: {
+			days: this.getElement('#days'),
+			hours: this.getElement('#hours'),
+			minutes: this.getElement('#minutes'),
+			seconds: this.getElement('#seconds'),
+			milliseconds: this.getElement('#milliseconds')
 		}
-
-		$body = document.getElementsByTagName("body")[0];
-		$main = getID("main");
-		$tools = getID("tools");
-
-		$message = getID("message");
-		$freakout = getClass("freakoutframe")[0];
-
-		// get ya dom
-		$days = getID("days");
-		$hours = getID("hours");
-		$minutes = getID("minutes");
-		$seconds = getID("seconds");
-		$milliseconds = getID("milliseconds");
-
-		$tools.classList.add("hidden");
-
+		};
+	
+		this.elements.tools.classList.add('hidden');
+	
 		switch(mode) {
 
-			default:
-			case "year":
-			$message.classList.add('hidden');
-			$tools.classList.add("hidden");
-			$freakout.classList.add("hidden");
-			interval();
-			break;
+		case 'test':
+		this.elements.message.classList.add('hidden');
+		this.elements.tools.classList.remove('hidden');
+		this.elements.freakout.classList.add('hidden');
+		
+		this.startInterval();
+		break;
 
-			case "happynewyear":
-			$main.classList.add("hidden");
-			endedAnimation();
-			break;
+		case 'year':
+		this.elements.message.classList.add('hidden');
+		this.elements.tools.classList.add('hidden');
+		this.elements.freakout.classList.add('hidden');
+		this.startInterval();
+		break;
+
+		case 'happynewyear':
+		this.elements.main.classList.add('hidden');
+		this.endedAnimation();
+		break;
 
 		}
-
-		fullscreen($body);
+	
+		this.requestFullscreen(this.elements.body);
 	}
-
-	/**
-	 * update the clock view
-	 */
-	function updateClockDisplay() {
-		$days.innerHTML = days;
-		$hours.innerHTML = hours;
-		$minutes.innerHTML = minutes;
-		$seconds.innerHTML = seconds;
-		$milliseconds.innerHTML = milliseconds;
-	}
-
-	/**
-	 * prefix an integer with some arbitrary character, eg '0'
-	 * @param {integer} integer - (or whatever) to left pad
-	 * @param {integer} stringLength - desired ending length
-	 * @return {string} The resulting string
-	 */
-	function numberPad(integer, stringLength, padChar) {
-		var s = '' + integer;
-		while(s.length < stringLength) {
-			s = padChar + s;
-		}
-		return s;
-	}
-
-	/**
-	 * update time values relative to reflect difference b/t 'now' and ending time
-	 * @return {bool}
-	 */
-	function updateTime() {
-
-		var now = new Date(),
-			nowMS = now.getTime(),
-			remainMS = targetMS - nowMS;
-
+	
+	// Time calculation and display
+	numberPad = (num, length, padChar) => String(num).padStart(length, padChar);
+	
+	updateTime() {
+		const now = new Date();
+		const remainMS = this.state.targetMS - now.getTime();
+	
 		if (remainMS < 0) {
-			remainMS = days = hours = minutes = seconds = milliseconds = 0;
+			return { remainMS: 0, times: { days: '00', hours: '00', minutes: '00', seconds: '00', milliseconds: '00' } };
 		}
-
-		days = numberPad(parseInt((remainMS % yearMS) / dayMS), 2, '0');
-		hours = numberPad(parseInt((remainMS % dayMS) / hourMS), 2, '0');
-		minutes = numberPad(parseInt((remainMS % hourMS) / minuteMS), 2, '0');
-		seconds = numberPad(parseInt((remainMS % minuteMS) / secondMS), 2, '0');
-
-		var lessMS = new String((remainMS % secondMS) / 10).split(".")[0];
-
-		milliseconds = numberPad(lessMS, 2, '0'); // @todo round down to 2 places ?
-
-		return remainMS > 0;
+	
+		const times = {
+			days: this.numberPad(Math.floor((remainMS % TIME_CONSTANTS.YEAR) / TIME_CONSTANTS.DAY), 2, '0'),
+			hours: this.numberPad(Math.floor((remainMS % TIME_CONSTANTS.DAY) / TIME_CONSTANTS.HOUR), 2, '0'),
+			minutes: this.numberPad(Math.floor((remainMS % TIME_CONSTANTS.HOUR) / TIME_CONSTANTS.MINUTE), 2, '0'),
+			seconds: this.numberPad(Math.floor((remainMS % TIME_CONSTANTS.MINUTE) / TIME_CONSTANTS.SECOND), 2, '0'),
+			milliseconds: this.numberPad(Math.floor((remainMS % TIME_CONSTANTS.SECOND) / 10), 2, '0')
+		};
+	
+		return { remainMS, times };
 	}
-
-	/**
-	 * one animation cycle
-	 * sets a timeout to run itself again in 1ms
-	 * @void
-	 */
-	function interval() {
-		var timeRemains = updateTime();
-
-		if (!timeRemains && !didEnded) {
-			didEnded = true;
-			endedAnimation();
+	
+	updateClockDisplay(times) {
+		Object.entries(times).forEach(([key, value]) => {
+		if (this.elements.countdown[key]) {
+			this.elements.countdown[key].textContent = value;
 		}
-
-		if (didEnded) {
-			freakoutFrame();
-		}
-
-		updateClockDisplay();
-		// scaleToFullWidth();
-
-		requestAnimationFrame(interval);
-
+		});
 	}
-
-	function scaleToFullWidth() {
-		$main.style.fontSize = fontSizeEMs + "em";
-		if ($main.clientWidth < $body.clientWidth)
-			fontSizeEMs += 0.01;
-		else if ($main.clientWidth > $body.clientWidth)
-			fontSizeEMs -= 0.01;
-		// $main.style.marginTop = '-' + ($main.clientHeight / 2) + 'px';
-	}
-
-	function _c() {
-		return 'rgba(' + Math.floor(Math.random() * 100) + ',' + Math.floor(Math.random() * 255) + ',' + Math.floor(Math.random() * 255) + ',' + Math.random().toPrecision(2) + ')';
-	}
-
-	function _l() {
-		return 'linear-gradient(' + Math.floor(Math.random() * 360) + 'deg, ' + _c() + ' ' + Math.floor(Math.random() * 100) + '%, ' + _c() + ' ' + Math.floor(Math.random() * 100) + '%, transparent)';
-	}
-
-	function getGradient() {
-
-		var s = '';
-
-		for(var i = 0; i < Math.random() * 3; i++) {
-			if (s != '')
-				s += ',';
-			s += _l();
-		}
-
-		return s;
-
-	}
-
-	function freakoutFrame() {
-		$freakout.classList.remove("hidden");
-		$freakout.classList.toggle("freakout-mode1");
-		$freakout.classList.toggle("freakout-mode2");
-	}
-
-	function fluffBgs() {
-
-		numBgLayers = getClass("floaty").length;
-
-		for(var bgi = 1; bgi <= numBgLayers; bgi++) {
-			backgroundPositions['bg' + bgi] = {
-				'obj' : getClass('bg' + bgi)[0],
-				'vars' : [Math.random() * 2000, Math.random() * 2000, Math.random() * 2000, Math.random() * 2000],
-				'speeds' : [Math.random() * 100 - 50, Math.random() * 100 - 50, Math.random() * 100 - 50, Math.random() * 100 - 50]
-			};
+	
+	// Background effects
+	generateColor = () => {
+		const r = Math.floor(Math.random() * 100);
+		const g = Math.floor(Math.random() * 255);
+		const b = Math.floor(Math.random() * 255);
+		const a = Math.random().toFixed(2);
+		return `rgba(${r},${g},${b},${a})`;
+	};
+	
+	generateGradient = () => {
+		const numGradients = Math.floor(Math.random() * 3);
+		return Array(numGradients).fill(null)
+		.map(() => {
+			const angle = Math.floor(Math.random() * 360);
+			const color1 = this.generateColor();
+			const color2 = this.generateColor();
+			const stop1 = Math.floor(Math.random() * 100);
+			const stop2 = Math.floor(Math.random() * 100);
+			return `linear-gradient(${angle}deg, ${color1} ${stop1}%, ${color2} ${stop2}%, transparent)`;
+		})
+		.join(',');
+	};
+	
+	initializeBackgrounds() {
+		this.state.numBgLayers = this.getAllElements('.floaty').length;
+		
+		for (let i = 1; i <= this.state.numBgLayers; i++) {
+		this.state.backgroundPositions[`bg${i}`] = {
+			obj: this.getElement(`.bg${i}`),
+			vars: Array(4).fill(null).map(() => Math.random() * 2000),
+			speeds: Array(4).fill(null).map(() => Math.random() * 100 - 50)
+		};
 		}
 	}
-
-	function randomBackgrounds() {
-		for(var bgi = 1; bgi <= numBgLayers; bgi++) {
-			var cur = backgroundPositions['bg' + bgi];
-			cur.obj.style.background = getGradient();
-		}
-	}
-
-	function updateBackgrounds() {
-		for(var bgi = 1; bgi <= numBgLayers; bgi++) {
-			if (!backgroundPositions['bg' + bgi]) {
-				fluffBgs();
+	
+	updateBackgrounds() {
+		Object.values(this.state.backgroundPositions).forEach(bg => {
+		bg.vars = bg.vars.map((val, i) => {
+			const newVal = val + bg.speeds[i];
+			if (newVal < 2 || newVal > 500) {
+			bg.speeds[i] *= -1;
+			return val + bg.speeds[i];
 			}
-			var cur = backgroundPositions['bg' + bgi];
-			for(var i = 0; i < cur.vars.length; i++) {
-				if (cur.vars[i] + cur.speeds[i] < 2 || cur.vars[i] + cur.speeds[i] > 500)
-					cur.speeds[i] *= -1;
-				cur.vars[i] += cur.speeds[i];
-			}
-			// apply across our moving crap
-			cur.obj.style.backgroundPosition = cur.vars[0] + 'px ' + cur.vars[1] + 'px';
-			cur.obj.style.backgroundSize = cur.vars[2] + 'px ' + cur.vars[3] + 'px';
-		}
+			return newVal;
+		});
+	
+		bg.obj.style.backgroundPosition = `${bg.vars[0]}px ${bg.vars[1]}px`;
+		bg.obj.style.backgroundSize = `${bg.vars[2]}px ${bg.vars[3]}px`;
+		});
 	}
+	
+	randomizeBackgrounds() {
+		Object.values(this.state.backgroundPositions).forEach(bg => {
+		bg.obj.style.background = this.generateGradient();
+		});
+	}
+	
+	backgroundMangler = () => {
+		this.updateBackgrounds();
+		if (Math.random() > 0.5) this.randomizeBackgrounds();
+		if (Math.random() > 0.5) this.initializeBackgrounds();
+		setTimeout(this.backgroundMangler, Math.random() * 600);
+	};
+	
+	// Animation and display effects
+	freakoutFrame = () => {
+		this.elements.freakout.classList.remove('hidden');
+		// cycle through freakout-mode1, freakout-mode2, freakout-mode3
 
-	function endedAnimation() {
-
-		$message.innerHTML = completeMessage;
-
-		// HAPPY NEW YEAR!
-		var blinker = setInterval(function(){
-			$message.classList.toggle('hidden');
+		this.elements.freakout.classList.remove('freakout-mode' + this.freakymode);
+		this.freakymode = (this.freakymode + 1) % this.freakymodes;
+		this.elements.freakout.classList.add('freakout-mode' + this.freakymode);
+	};
+	
+	endedAnimation() {
+		this.elements.message.textContent = this.state.completeMessage;
+	
+		const blinker = setInterval(() => {
+			this.elements.message.classList.toggle('hidden');
 		}, 250);
+	
+		setTimeout(() => {
 
-		setTimeout(function(){
+			clearInterval(blinker);
+			this.elements.message.classList.remove('hidden');
+			this.elements.message.textContent = "OH SHIT! HERE WE GO AGAIN!";
+		
+			setTimeout(() => {
+				this.elements.message.classList.add('hidden');
+				this.elements.message.textContent = this.state.completeMessage;
+				this.initialize('year');
+			}, 10 * TIME_CONSTANTS.SECOND);
 
-			clearTimeout(blinker);
-			$message.classList.remove('hidden');
-			$message.innerHTML = "OH SHIT! HERE WE GO AGAIN!";
-
-			setTimeout(function(){
-				$message.classList.add('hidden');
-				$message.innerHTML = completeMessage;
-				run("year");
-			}, 10 * secondMS);
-
-		}, 45 * secondMS); // in 45 seconds, start counting down to next year
-
+		}, 45 * TIME_CONSTANTS.SECOND);
 	}
-
-	function backgroundMangler(noLoop) {
-		updateBackgrounds();
-		if (Math.random() > .5)
-			randomBackgrounds();
-		if (Math.random() > .5)
-			fluffBgs();
-		setTimeout(backgroundMangler,  Math.random() * 600);
-	}
-
-	function fullscreen(elem) {
-		if (elem.requestFullscreen) {
-			elem.requestFullscreen();
-		} else if (elem.msRequestFullscreen) {
-			elem.msRequestFullscreen();
-		} else if (elem.mozRequestFullScreen) {
-			elem.mozRequestFullScreen();
-		} else if (elem.webkitRequestFullscreen) {
-			elem.webkitRequestFullscreen();
+	
+	// Core animation loop
+	startInterval = () => {
+		const { remainMS, times } = this.updateTime();
+	
+		if (!remainMS && !this.state.didEnded) {
+			this.state.didEnded = true;
+			this.endedAnimation();
+		}
+	
+		if (this.state.didEnded) {
+			this.freakoutFrame();
+		}
+	
+		this.updateClockDisplay(times);
+		requestAnimationFrame(this.startInterval);
+	};
+	
+	// Fullscreen helper
+	requestFullscreen(element) {
+		const fullscreenMethods = [
+		'requestFullscreen',
+		'msRequestFullscreen',
+		'mozRequestFullScreen',
+		'webkitRequestFullscreen'
+		];
+	
+		const method = fullscreenMethods.find(method => element[method]);
+		if (method) {
+		element[method]();
 		}
 	}
+}
 
-	fluffBgs();
-	randomBackgrounds();
-	backgroundMangler();
+// Initialize and expose to window
+const countdown = new CountdownTimer();
+countdown.initializeBackgrounds();
+countdown.randomizeBackgrounds();
+countdown.backgroundMangler();
 
-	window.run = run;
-
-})();
+window.run = (mode, quickMS) => countdown.initialize(mode, quickMS);
